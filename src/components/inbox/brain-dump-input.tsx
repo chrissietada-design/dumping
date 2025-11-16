@@ -1,17 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { useInboxStore } from "@/stores/inbox-store";
 
-export function BrainDumpInput() {
-  const addItem = useInboxStore((state) => state.addItem);
+type Props = {
+  onSubmit: (content: string) => Promise<void> | void;
+  isSubmitting?: boolean;
+};
+
+export function BrainDumpInput({ onSubmit, isSubmitting = false }: Props) {
   const [value, setValue] = useState("");
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const trimmed = value.trim();
-    if (!trimmed) return;
-    addItem(trimmed);
+    if (!trimmed || isSubmitting) return;
+
+    await onSubmit(trimmed);
     setValue("");
   };
 
@@ -37,9 +41,9 @@ export function BrainDumpInput() {
         <button
           type="submit"
           className="rounded-2xl bg-emerald-400 px-6 py-3 text-base font-semibold text-slate-950 transition hover:bg-emerald-300 disabled:opacity-50"
-          disabled={!value.trim()}
+          disabled={!value.trim() || isSubmitting}
         >
-          추가
+          {isSubmitting ? "추가 중..." : "추가"}
         </button>
       </div>
     </form>

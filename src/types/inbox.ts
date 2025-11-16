@@ -2,6 +2,7 @@ export type InboxStatus = "pending" | "scheduled" | "done";
 
 export type InboxItem = {
   id: string;
+  userId: string;
   content: string;
   status: InboxStatus;
   createdAt: string;

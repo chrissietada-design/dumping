@@ -1,22 +1,20 @@
 "use client";
 
-import { useInboxStore } from "@/stores/inbox-store";
+type Props = {
+  pendingCount: number;
+  autoCarryOver: boolean;
+  onToggleAuto: (value: boolean) => void;
+  onCarryOver: () => void;
+  isProcessing?: boolean;
+};
 
-export function CarryOverPanel() {
-  const {
-    items,
-    autoCarryOver,
-    setAutoCarryOver,
-    carryOverIncomplete,
-  } = useInboxStore((state) => ({
-    items: state.items,
-    autoCarryOver: state.autoCarryOver,
-    setAutoCarryOver: state.setAutoCarryOver,
-    carryOverIncomplete: state.carryOverIncomplete,
-  }));
-
-  const pendingCount = items.filter((item) => item.status !== "done").length;
-
+export function CarryOverPanel({
+  pendingCount,
+  autoCarryOver,
+  onToggleAuto,
+  onCarryOver,
+  isProcessing = false,
+}: Props) {
   return (
     <section className="rounded-3xl border border-white/10 bg-gradient-to-b from-slate-900/70 to-slate-900/30 p-5">
       <p className="text-sm font-semibold text-white">자동 이월 설정</p>
@@ -32,7 +30,7 @@ export function CarryOverPanel() {
           </p>
         </div>
         <button
-          onClick={() => setAutoCarryOver(!autoCarryOver)}
+          onClick={() => onToggleAuto(!autoCarryOver)}
           className={`relative h-8 w-16 rounded-full transition ${
             autoCarryOver ? "bg-emerald-400" : "bg-white/20"
           }`}
@@ -51,11 +49,11 @@ export function CarryOverPanel() {
           오늘 미완료 항목 {pendingCount}개
         </p>
         <button
-          onClick={carryOverIncomplete}
-          className="w-full rounded-2xl bg-white/20 py-2 text-sm font-semibold text-white transition hover:bg-white/30"
-          disabled={pendingCount === 0}
+          onClick={onCarryOver}
+          className="w-full rounded-2xl bg-white/20 py-2 text-sm font-semibold text-white transition hover:bg-white/30 disabled:opacity-50"
+          disabled={pendingCount === 0 || isProcessing}
         >
-          선택 항목 내일로 보내기
+          {isProcessing ? "이동 중..." : "선택 항목 내일로 보내기"}
         </button>
         <p className="text-xs text-white/60">
           수동 버튼을 누르면 즉시 내일 브레인덤프 리스트에 복사된 것으로 표시됩니다.
