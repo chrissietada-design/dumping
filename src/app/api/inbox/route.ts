@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getDemoUserId } from "@/lib/users/demo-user";
 import type { InboxItem } from "@/types/inbox";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
+import {
+  addMockItem,
+  listMockItems,
+} from "@/mock/inbox-data";
 
 const userId = getDemoUserId();
 
@@ -28,6 +33,10 @@ function normalizeItems(data: InboxRow[]): InboxItem[] {
 }
 
 export async function GET() {
+  if (!isSupabaseConfigured()) {
+    return NextResponse.json({ items: listMockItems() });
+  }
+
   const supabase = createServerSupabaseClient();
   const { data, error } = await supabase
     .from("inbox_items")
@@ -46,6 +55,16 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  if (!isSupabaseConfigured()) {
+    const body = await request.json();
+    const content = (body?.content ?? "").trim();
+    if (!content) {
+      return NextResponse.json({ error: "내용을 입력해주세요." }, { status: 400 });
+    }
+    const item = addMockItem(content);
+    return NextResponse.json({ item });
+  }
+
   const supabase = createServerSupabaseClient();
   const body = await request.json();
   const content = (body?.content ?? "").trim();

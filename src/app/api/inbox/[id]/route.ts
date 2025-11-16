@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getDemoUserId } from "@/lib/users/demo-user";
 import type { InboxStatus } from "@/types/inbox";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { updateMockItem } from "@/mock/inbox-data";
 
 const userId = getDemoUserId();
 
@@ -9,7 +11,6 @@ export async function PATCH(
   request: NextRequest,
   context: { params: Promise<{ id: string }> },
 ) {
-  const supabase = createServerSupabaseClient();
   const body = await request.json();
   const status = body?.status as InboxStatus | undefined;
   const { id } = await context.params;
@@ -22,6 +23,13 @@ export async function PATCH(
   if (!allowed.includes(status)) {
     return NextResponse.json({ error: "잘못된 상태 값입니다." }, { status: 400 });
   }
+
+  if (!isSupabaseConfigured()) {
+    updateMockItem(id, status);
+    return NextResponse.json({ ok: true });
+  }
+
+  const supabase = createServerSupabaseClient();
 
   const { data, error } = await supabase
     .from("inbox_items")

@@ -1,10 +1,17 @@
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getDemoUserId } from "@/lib/users/demo-user";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { carryOverMockItems } from "@/mock/inbox-data";
 
 const userId = getDemoUserId();
 
 export async function POST() {
+  if (!isSupabaseConfigured()) {
+    carryOverMockItems();
+    return NextResponse.json({ mocked: true });
+  }
+
   const supabase = createServerSupabaseClient();
   const now = new Date().toISOString();
 

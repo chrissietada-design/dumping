@@ -10,9 +10,10 @@ export function createBrowserSupabaseClient() {
     console.warn(
       "Supabase 환경변수가 설정되지 않았습니다. .env.local 파일을 확인하세요.",
     );
+    return null;
   }
 
-  return createClient(url ?? "", key ?? "", {
+  return createClient(url, key, {
     global: { headers: { "x-client-info": "dumping-app" } },
   });
 }
